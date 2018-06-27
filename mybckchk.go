@@ -15,7 +15,7 @@ import (
 var stateCache, debug bool
 var logger = logging.NewLogger("MySQL backend checker")
 
-type Configuration struct {
+type configuration struct {
 	mysqlHost     string
 	mysqlUser     string
 	mysqlPass     string
@@ -24,7 +24,7 @@ type Configuration struct {
 	listenPort    int
 	checkInterval int
 }
-type Command struct {
+type command struct {
 	query  string
 	expect string
 }
@@ -73,7 +73,7 @@ func debugLog(msg string) {
 		logger.Info(msg)
 	}
 }
-func checkController(config *Configuration, commands []Command) {
+func checkController(config *configuration, commands []command) {
 	tick := time.NewTicker(time.Millisecond * time.Duration(config.checkInterval)).C
 	for {
 		select {
@@ -82,7 +82,7 @@ func checkController(config *Configuration, commands []Command) {
 		}
 	}
 }
-func checkBackend(config *Configuration, commands []Command) {
+func checkBackend(config *configuration, commands []command) {
 	var result string
 	preCheckState := stateCache
 	debugLog("Running checks")
@@ -121,7 +121,7 @@ func checkBackend(config *Configuration, commands []Command) {
 	}
 
 }
-func mysqlURIBuilder(config *Configuration) string {
+func mysqlURIBuilder(config *configuration) string {
 	uri := ""
 	if config.mysqlHost == "" { // if mysqlHost is not defined, we'll connect through local socket
 		uri = fmt.Sprint(config.mysqlUser, ":", config.mysqlPass, "@", "/", config.mysqlDb)
@@ -132,7 +132,7 @@ func mysqlURIBuilder(config *Configuration) string {
 	return uri
 }
 
-func connectDb(config *Configuration) *sql.DB {
+func connectDb(config *configuration) *sql.DB {
 	connectUri := mysqlURIBuilder(config)
 	db, err := sql.Open("mysql", connectUri)
 	if err != nil {
@@ -145,10 +145,10 @@ func connectDb(config *Configuration) *sql.DB {
 	debugLog("Connected to database")
 	return db
 }
-func configure(cfgfile string) (*Configuration, []Command) {
+func configure(cfgfile string) (*configuration, []command) {
 	var mysqlPort, listenPort, checkInterval int
-	var conf Configuration
-	var commands []Command
+	var conf configuration
+	var commands []command
 	config, err := ini.Load(cfgfile)
 	if err != nil {
 		logger.Error("Can't load config file!")
@@ -171,7 +171,7 @@ func configure(cfgfile string) (*Configuration, []Command) {
 				if checkInterval == 0 {
 					checkInterval = 1000
 				}
-				conf = Configuration{
+				conf = configuration{
 					mysqlHost:     section.Key("mysql_host").String(),
 					mysqlUser:     section.Key("mysql_user").String(),
 					mysqlPass:     section.Key("mysql_password").String(),
@@ -182,8 +182,8 @@ func configure(cfgfile string) (*Configuration, []Command) {
 				}
 				debugLog("Config loaded")
 			} else { // here start the command parsing
-				var cmd Command
-				cmd = Command{
+				var cmd command
+				cmd = command{
 					query:  section.Key("query").String(),
 					expect: section.Key("expect").String(),
 				}
