@@ -1,29 +1,12 @@
-# How to build MySQL backend checker
+# Building mybckchk
 
-For building this project you can simply use GNU make.
+Use Go 1.26.11 or a newer patched release for deployment. The Go module
+suggests Go 1.26.11 for local builds. From the repository root, run `make` to build
+`mybckchk` for your current platform. Go downloads the pinned dependencies
+as needed. Use `make deps` to download them separately.
 
-### Build the mybckchk for the current architecture
-If you want to build mybckchk for your current architecture, you can do that with a simple make command. 
-This will download all the dependencies, and builds mybckchk binary
+Use `make linux` or `make darwin` to target another operating system.
+Set `GOARCH` when targeting a different architecture. Each build writes
+`mybckchk`. Use `make clean` to remove the binary.
 
-    > make
-
-### Download dependencies
-If you want to download all the dependencies for development, but you don't want to build the app, just make deps
-
-    > make deps
-
-### Build for OSX (darwin)
-You can explicit tell if the build target is OSX. 
-
-    > make darwin
-
-### Build for Linux
-You can explicit tell if the build target is Linux. 
-
-    > make linux
-    
-### Remove all files  
-If you have changes in the code, before commiting to github you should remove all the files which were created during build.
-
-    > make clean
+Run `go vet ./...` and `go test -race ./...` before submitting changes.
